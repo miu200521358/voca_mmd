@@ -1,0 +1,88 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "edit_sequences_blink",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "program": "${workspaceRoot}/edit_sequences.py",
+            "args": [
+                "--source_path", "./animation_output/meshes",
+                "--out_path", "./FLAME_variation_shape",
+                "--flame_model_path", "model/frame2019/generic_model.pkl",
+
+                // "--mode", "shape",
+                // "--index", "0",
+                // "--max_variation", "3",
+
+                "--mode", "blink",
+                "--num_blinks", "6",
+                "--blink_duration", "10",
+
+                // "--mode", "pose",
+                // "--index", "4",
+                // "--max_variation", "0.52",
+
+                "--audio_fname", "./audio/scissorhands.wav",
+                "--template_fname", "./template/FLAME_sample.ply",
+
+                // "--audio-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\bbf2\\bbf.wav",
+                // "--lyrics-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\bbf2\\bbf_full.txt",
+                // "--audio-dir", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\bbf2\\bbf_wav_20210111_141547",
+
+                // "--audio-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\scissorhands\\ask.wav",
+                // "--lyrics-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\scissorhands\\scissor_last.txt",
+                // "--audio-dir", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\scissorhands\\ask_wav_20210114_211409",
+
+                // // "--process", "vocals,lip",
+                // // "--process", "vocals",
+                // "--process", "lip",
+                // "--threshold", "0",
+                // // 5: test, 10: debug, 20: info, 30: warning
+                // "--verbose", "20",
+                // // 0: readonly, 1: update
+                // "--log-mode", "0",
+            ]
+        },
+        {
+            "name": "run_voca",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "program": "${workspaceRoot}/run_voca.py",
+            "args": [
+                "--tf_model_fname", "./model/voca/gstep_52280.model",
+                "--ds_fname", "./ds_graph/output_graph.pb",
+                "--audio_fname", "./audio/scissorhands.wav",
+                "--template_fname", "./template/FLAME_sample.ply",
+                "--uv_template_fname", "./template/texture_mesh.obj",
+                "--texture_img_fname", "./template/texture_mesh.png",
+                "--condition_idx", "3",
+                "--out_path", "./animation_output",
+
+                // "--audio-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\bbf2\\bbf.wav",
+                // "--lyrics-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\bbf2\\bbf_full.txt",
+                // "--audio-dir", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\bbf2\\bbf_wav_20210111_141547",
+
+                // "--audio-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\scissorhands\\ask.wav",
+                // "--lyrics-file", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\scissorhands\\scissor_last.txt",
+                // "--audio-dir", "E:\\MMD\\MikuMikuDance_v926x64\\Work\\201805_auto\\lip\\scissorhands\\ask_wav_20210114_211409",
+
+                // // "--process", "vocals,lip",
+                // // "--process", "vocals",
+                // "--process", "lip",
+                // "--threshold", "0",
+                // // 5: test, 10: debug, 20: info, 30: warning
+                // "--verbose", "20",
+                // // 0: readonly, 1: update
+                // "--log-mode", "0",
+            ]
+        },
+    ]
+}

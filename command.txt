@@ -1,0 +1,86 @@
+conda create -n voca pip python=3.6.5
+
+activate voca
+
+conda install -c conda-forge cgal
+
+conda install -c conda-forge ffmpeg
+
+pip install -r requirements.txt
+
+pip install numpy --upgrade
+
+git clone https://github.com/MPI-IS/mesh.git
+
+cd mesh
+
+python setup_windows.py build  
+
+python setup_windows.py bdist_wheel
+
+pip install dist\psbody_mesh-0.4-cp36-cp36m-win_amd64.whl
+
+---------------
+
+C:\MMD\voca_mmd\utils\rendering.py
+
+if os.name == 'posix':
+    import resource
+    rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+    resource.setrlimit(resource.RLIMIT_NOFILE, (rlimit[1], rlimit[1]))
+    os.environ['PYOPENGL_PLATFORM'] = 'egl'
+
+---------------
+
+C:\Development\Anaconda3\envs\voca\Lib\site-packages\pyrender\platforms\pyglet_platform.py
+
+    def make_uncurrent(self):
+        try:
+            import pyglet
+            pyglet.gl.xlib.glx.glXMakeContextCurrent(self._window.context.x_display, 0, 0, None)
+        except:
+            pass
+
+---------------
+
+(voca) C:\MMD\voca_mmd>python run_voca.py --tf_model_fname ./model/voca/gstep_52280.model --ds_fname ./ds_graph/output_graph.pb --audio_fname ./audio/test_sentence.wav --template_fname ./template/FLAME_sample.ply --condition_idx 3 --out_path ./animation_output
+
+--------------
+
+download
+
+https://voca.is.tue.mpg.de/downloads
+ -> VOCA -> Trained Model
+ -> models/voca
+
+https://flame.is.tue.mpg.de/downloads
+ -> FLAME 2020
+ -> ds_graph
+
+------------------
+
+
+boost
+
+https://www.boost.org/users/history/version_1_75_0.html
+
+(voca) C:\MMD\voca_mmd\boost\boost_1_75_0>bootstrap.bat
+
+b2.exe --prefix="C:\Development\Anaconda3\envs\voca\Library\bin" --includedir="C:\Development\Anaconda3\envs\voca\Library\include" --libdir="C:\Development\Anaconda3\envs\voca\Library\lib" --build-type=complete toolset=msvc-16.0 install
+
+git clone https://github.com/MPI-IS/mesh
+
+pip install wheel
+
+conda install -c conda-forge/label/cf202003 cgal
+
+(voca) C:\MMD\voca_mmd\mesh>python setup_windows.py build  
+
+(voca) C:\MMD\voca_mmd\mesh>python setup_windows.py bdist_wheel
+
+
+------------------
+
+python run_voca.py --tf_model_fname './model/voca/gstep_52280.model' --ds_fname './ds_graph/output_graph.pb' --audio_fname './audio/test_sentence.wav' --template_fname './template/FLAME_sample.ply' --condition_idx 3 --out_path './animation_output'
+
+

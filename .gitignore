@@ -1,0 +1,6 @@
+animation_output/
+mesh/
+model/
+ds_graph/
+FLAME_variation_shape/
+*.pyc

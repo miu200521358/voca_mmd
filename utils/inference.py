@@ -1,5 +1,4 @@
 '''
-Max-Planck-Gesellschaft zur Foerderung der Wissenschaften e.V. (MPG) is holder of all proprietary rights on this
 computer program.
 
 You can only use this computer program if you have closed a license agreement with MPG or you get the right to use
@@ -21,12 +20,17 @@ import cv2
 import scipy
 import tempfile
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+    from utils.audio_handler import  AudioHandler
+except:
+    pass
+    
 from subprocess import call
 from scipy.io import wavfile
+from tqdm import tqdm
 
 from psbody.mesh import Mesh
-from utils.audio_handler import  AudioHandler
 from utils.rendering import render_mesh_helper
 
 def process_audio(ds_path, audio, sample_rate):
@@ -55,7 +59,7 @@ def output_sequence_meshes(sequence_vertices, template, out_path, uv_template_fn
         vt, ft = None, None
 
     num_frames = sequence_vertices.shape[0]
-    for i_frame in range(num_frames):
+    for i_frame in tqdm(range(num_frames)):
         out_fname = os.path.join(mesh_out_path, '%05d.obj' % i_frame)
         out_mesh = Mesh(sequence_vertices[i_frame], template.f)
         if vt is not None and ft is not None:
@@ -68,11 +72,10 @@ def render_sequence_meshes(audio_fname, sequence_vertices, template, out_path, u
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
-    tmp_video_file = tempfile.NamedTemporaryFile('w', suffix='.mp4', dir=out_path)
-    if int(cv2.__version__[0]) < 3:
-        writer = cv2.VideoWriter(tmp_video_file.name, cv2.cv.CV_FOURCC(*'mp4v'), 60, (800, 800), True)
-    else:
-        writer = cv2.VideoWriter(tmp_video_file.name, cv2.VideoWriter_fourcc(*'mp4v'), 60, (800, 800), True)
+    # tmp_video_file = tempfile.NamedTemporaryFile('w', suffix='.mp4', dir=out_path)
+    tmp_video_file = os.path.join(out_path, "tmp.mp4")
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    writer = cv2.VideoWriter(tmp_video_file, fourcc, 60.0, (800, 800))
 
     if os.path.exists(uv_template_fname) and os.path.exists(texture_img_fname):
         uv_template = Mesh(filename=uv_template_fname)
@@ -81,20 +84,23 @@ def render_sequence_meshes(audio_fname, sequence_vertices, template, out_path, u
     else:
         vt, ft = None, None
         tex_img = None
+    
+    os.makedirs(os.path.join(out_path, "img"), exist_ok=True)
 
     num_frames = sequence_vertices.shape[0]
     center = np.mean(sequence_vertices[0], axis=0)
-    for i_frame in range(num_frames):
+    for i_frame in tqdm(range(num_frames)):
         render_mesh = Mesh(sequence_vertices[i_frame], template.f)
         if vt is not None and ft is not None:
             render_mesh.vt, render_mesh.ft = vt, ft
         img = render_mesh_helper(render_mesh, center, tex_img=tex_img)
+        # cv2.imwrite(os.path.join(out_path, "img", f'{i_frame:012}.png'), img)
         writer.write(img)
     writer.release()
 
     video_fname = os.path.join(out_path, 'video.mp4')
     cmd = ('ffmpeg' + ' -i {0} -i {1} -vcodec h264 -ac 2 -channel_layout stereo -pix_fmt yuv420p {2}'.format(
-        audio_fname, tmp_video_file.name, video_fname)).split()
+        audio_fname, tmp_video_file, video_fname)).split()
     call(cmd)
 
 

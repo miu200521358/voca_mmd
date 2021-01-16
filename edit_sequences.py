@@ -20,8 +20,10 @@ import glob
 import argparse
 import numpy as np
 from psbody.mesh import Mesh
-from utils.inference import output_sequence_meshes
+import tqdm
+from utils.inference import output_sequence_meshes, render_sequence_meshes
 from smpl_webuser.serialization import load_model
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description='Edit VOCA motion sequences')
 
@@ -35,6 +37,8 @@ parser.add_argument('--num_blinks', type=int, default=1, help='number of eye bli
 parser.add_argument('--blink_duration', type=int, default=15, help='blink_duration')
 parser.add_argument('--uv_template_fname', default='', help='Path of a FLAME template with UV coordinates')
 parser.add_argument('--texture_img_fname', default='', help='Path of the texture image')
+parser.add_argument('--audio_fname', default='./audio/test_sentence.wav', help='Path of input speech sequence')
+parser.add_argument('--template_fname', default='./template/FLAME_sample.ply', help='Path of "zero pose" template mesh in" FLAME topology to be animated')
 
 args = parser.parse_args()
 source_path = args.source_path
@@ -93,7 +97,7 @@ def add_eye_blink(source_path, out_path, flame_model_fname, num_blinks, blink_du
 
     frequency = num_frames // (num_blinks+1)
     weights = np.zeros(num_frames)
-    for i in range(num_blinks):
+    for i in tqdm(range(num_blinks)):
         x1 = (i+1)*frequency-blink_duration//2
         x2 = x1+3*step
         if x1 >= 0 and x2 < weights.shape[0]:
@@ -101,12 +105,14 @@ def add_eye_blink(source_path, out_path, flame_model_fname, num_blinks, blink_du
 
     predicted_vertices = np.zeros((num_frames, model.v_template.shape[0], model.v_template.shape[1]))
 
-    for frame_idx in range(num_frames):
+    for frame_idx in tqdm(range(num_frames)):
         model.v_template[:] = Mesh(filename=sequence_fnames[frame_idx]).v
         model.betas[300:] = weights[frame_idx]*blink_exp_betas
         predicted_vertices[frame_idx] = model.r
 
     output_sequence_meshes(predicted_vertices, Mesh(model.v_template, model.f), out_path, uv_template_fname=uv_template_fname, texture_img_fname=texture_img_fname)
+
+    render_sequence_meshes(args.audio_fname, predicted_vertices, Mesh(filename=args.template_fname), out_path, uv_template_fname, texture_img_fname)
 
 
 def alter_sequence_shape(source_path, out_path, flame_model_fname, pc_idx=0, pc_range=(0,3), uv_template_fname='', texture_img_fname=''):
@@ -149,12 +155,14 @@ def alter_sequence_shape(source_path, out_path, flame_model_fname, pc_idx=0, pc_
 
     predicted_vertices = np.zeros((num_frames, model.v_template.shape[0], model.v_template.shape[1]))
 
-    for frame_idx in range(num_frames):
+    for frame_idx in tqdm(range(num_frames)):
         model.v_template[:] = Mesh(filename=sequence_fnames[frame_idx]).v
         model.betas[:300] = model_parms[frame_idx]
         predicted_vertices[frame_idx] = model.r
 
     output_sequence_meshes(predicted_vertices, Mesh(model.v_template, model.f), out_path, uv_template_fname=uv_template_fname, texture_img_fname=texture_img_fname)
+
+    render_sequence_meshes(args.audio_fname, predicted_vertices, Mesh(filename=args.template_fname), out_path, uv_template_fname, texture_img_fname)
 
 def alter_sequence_head_pose(source_path, out_path, flame_model_fname, pose_idx=3, rot_angle=np.pi/6, uv_template_fname='', texture_img_fname=''):
     '''
@@ -202,12 +210,14 @@ def alter_sequence_head_pose(source_path, out_path, flame_model_fname, pose_idx=
 
     predicted_vertices = np.zeros((num_frames, model.v_template.shape[0], model.v_template.shape[1]))
 
-    for frame_idx in range(num_frames):
+    for frame_idx in tqdm(range(num_frames)):
         model.v_template[:] = Mesh(filename=sequence_fnames[frame_idx]).v
         model.pose[:] = model_parms[frame_idx]
         predicted_vertices[frame_idx] = model.r
 
     output_sequence_meshes(predicted_vertices, Mesh(model.v_template, model.f), out_path, uv_template_fname=uv_template_fname, texture_img_fname=texture_img_fname)
+
+    render_sequence_meshes(args.audio_fname, predicted_vertices, Mesh(filename=args.template_fname), out_path, uv_template_fname, texture_img_fname)
 
 if(args.mode == 'shape'):
     pc_idx = args.index
